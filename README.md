@@ -1,7 +1,7 @@
-# Praetorian
-
 <img src="http://raw.github.com/vdemeester/praetorian/master/imgs/praetorian.png"
  alt="Praetorian logo" title="The man himself" align="right" />
+
+# Praetorian
 
 A command to be used as an ssh command that allow multiple commands for multiple
 ssh keys. It uses [sshcommand](https://github.com/progrium/sshcommand) for the
