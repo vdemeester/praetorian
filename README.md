@@ -3,9 +3,13 @@
 <img src="http://raw.github.com/vdemeester/praetorian/master/imgs/praetorian.png"
  alt="Praetorian logo" title="The man himself" align="right" />
 
-A command to be used as an ssh command that allow multiple commands for multiple
-ssh keys. It uses [sshcommand](https://github.com/progrium/sshcommand) for the
-setup in ``$HOME/.ssh/authorized_keys``.
+Praetorian is a command to be used as an ssh command that allow multiple
+commands for multiple ssh keys. It is similar to [sshcommand](https://github.com/progrium/sshcommand)
+for the ``$HOME/.ssh/authorized_keys`` part, as it uses the same format.
+
+The basic idea is to allow a set of commands for an identity (a.k.a.
+an ssh key). Each identities are identified by an alias, a given
+name for the public keys.
 
 ## Usage
 
