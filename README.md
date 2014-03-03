@@ -41,7 +41,7 @@ moment, a simple shell-like file.
 ## How does it works
 
 - Using ssh ``authorized_keys`` options
-- Reading config file and executing the command
+- Reading config file and executing the wrapper command
 
 ## Troubleshootings
 
