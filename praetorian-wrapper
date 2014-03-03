@@ -1,0 +1,47 @@
+#!/bin/bash
+# The praetorian wrapper. This command is executed via the .ssh/authorized_keys.
+# When executed, there is a few required environment variable (that should be
+# sent by ssh)
+set -o errexit
+
+# Test for the SSH_ORIGINAL_COMMAND
+test -n "${SSH_ORIGINAL_COMMAND}"
+# Test for the NAME
+test -n "${NAME}"
+# Optionnal CONFIG_FILE variable (for testing purpose mainly)
+test -z "$CONFIG_FILE" && CONFIG_FILE=$HOME/.ssh/praetorian
+
+__DIR__="$(cd "$(dirname "${0}")"; echo $(pwd))"
+__BASE__="$(basename "${0}")"
+__FILE__="${__DIR__}/${__BASE__}"
+
+# Sourcing the configuration file
+# FIXME this is not really safe, find another way
+if [[ -O $CONFIG_FILE ]]; then
+    if [[ $(stat --format %a $CONFIG_FILE) == 600 ]]; then
+        . $CONFIG_FILE
+    else
+        echo "Warning: praetorian file should be only readable by you (600)"
+        echo "Aborting.."
+        exit 1
+    fi
+else
+    echo "No praetorian file in .ssh, you won't be able to do anything.."
+    exit 1
+fi
+
+# Using magic :)
+COMMANDS="${!NAME}"
+
+for COMMAND in ${COMMANDS}; do
+    if [[ "${SSH_ORIGINAL_COMMAND}" = ${COMMAND}* ]]; then
+        logger --tag ${__BASE__} -- "Alias ${NAME} Executing ${SSH_ORIGINAL_COMMAND}"
+        COMMAND_FOUND=${COMMAND}
+        $SSH_ORIGINAL_COMMAND
+    fi
+done
+
+test -z $COMMAND_FOUND && {
+    logger --tag ${__BASE__} --stderr -- "Alias ${NAME} Invalid command ${SSH_ORIGINAL_COMMAND}"
+    exit 1
+}
