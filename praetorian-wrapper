@@ -38,6 +38,8 @@ for COMMAND in ${COMMANDS}; do
         logger --tag ${__BASE__} -- "Alias ${NAME} Executing ${SSH_ORIGINAL_COMMAND}"
         COMMAND_FOUND=${COMMAND}
         $SSH_ORIGINAL_COMMAND
+        # And exiting with the last code
+        exit $?
     fi
 done
 
