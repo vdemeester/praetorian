@@ -29,6 +29,7 @@ Now you have some commands allowed, let's try it.
     public_html
     $ ssh user@host pwd
     # Nothing, just exit 1
+    praetorian-wrapper: Alias gohei Invalid command pwd
     $ ssh user@host nc -w 1 host2 22
     (host2) $
 
