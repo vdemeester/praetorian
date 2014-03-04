@@ -1,0 +1,37 @@
+#!/bin/bash
+# The praetorian command, used to setup the praetorian_wrapper in the
+# .ssh/authorized_keys.
+set -o errexit
+
+__DIR__="$(cd "$(dirname "${0}")"; echo $(pwd))"
+__BASE__="$(basename "${0}")"
+__FILE__="${__DIR__}/${__BASE__}"
+
+PRAETORIAN_WRAPPER=praetorian-wrapper
+
+case $1 in
+    setup)
+        if [[ $# -ne 3 ]]; then
+            echo "Usage : ${__BASE__} setup user myalias"
+            exit 1
+        fi
+        USER="$2"
+        NAME="$3"
+
+        getent passwd $USER > /dev/null || false
+        USERHOME=$(bash <<< "echo ~$USER")
+        
+        mkdir -p "$USERHOME/.ssh"
+        touch $USERHOME/.ssh/authorized_keys
+
+        KEY=$(cat)
+        
+        FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
+        KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME ${PRAETORIAN_WRAPPER} \$SSH_ORIGINAL_COMMAND\",no-X11-forwarding"
+        echo "$KEY_PREFIX $KEY" >> "$USERHOME/.ssh/authorized_keys"
+        echo $FINGERPRINT
+        ;;
+    help|*)
+        echo "Usage : ${__BASE__} setup user myalias"
+        ;;
+esac
