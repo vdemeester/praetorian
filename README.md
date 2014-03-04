@@ -17,7 +17,17 @@ To setup praetorian, you'll need the ssh public key and that's pretty much it.
 
     $ cat ~/.id_rsa.pub | ssh user@host praetorian setup myalias
 
-Next you need to edit the configuration file on the remote.
+Next you need to edit the configuration file on the remote, see the [next section](#praetorian-configuration).
+Let say we add ``ls`` and ``nc`` as allowed commands (nc for allowing ssh gateway via ProxyCommand).
+Now you have some commands allowed, let's try it.
+
+    $ ssh user@host ls
+    src
+    public_html
+    $ ssh user@host pwd
+    # Nothing, just exit 1
+    $ ssh user@host nc -w 1 host2 22
+    (host2) $
 
 <!--
 Now, if the user identified with this ssh key is connecting, it will read the
