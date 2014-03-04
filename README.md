@@ -11,6 +11,9 @@ The basic idea is to allow a set of commands for an identity (a.k.a.
 an ssh key). Each identities are identified by an alias, a given
 name for the public keys.
 
+**Note : This is an alpha software that is not even finished. Use
+at your own risk ; though it should be usable in the next week**
+
 ## Usage
 
 To setup praetorian, you'll need the ssh public key and that's pretty much it.
