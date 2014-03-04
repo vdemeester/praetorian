@@ -1,1 +1,115 @@
-index
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>praetorian</title>
+    
+    <link rel="stylesheet" type="text/css" href="http://documentup.com/stylesheets/themes/v1.css">
+    
+    
+
+    
+
+    <!-- Typekit -->
+    
+      <script type="text/javascript">
+        (function() {
+          var config = {
+            kitId: 'hjp0pft',
+            scriptTimeout: 3000
+          };
+          var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=setTimeout(function(){h.className=h.className.replace(/( |^)wf-loading( |$)/g,"");h.className+=" wf-inactive"},config.scriptTimeout);var tk=document.createElement("script");tk.src='//use.typekit.net/'+config.kitId+'.js';tk.type="text/javascript";tk.async="true";tk.onload=tk.onreadystatechange=function(){var a=this.readyState;if(a&&a!="complete"&&a!="loaded")return;clearTimeout(t);try{Typekit.load(config)}catch(b){}};var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(tk,s)
+        })();
+      </script>
+    
+  </head>
+  <body><div id="container">
+  <div id="nav">
+    
+      <div id="header">
+        <a href="#" id="logo">praetorian</a>
+      </div>
+    
+    <ul id="sections">
+      
+        <li>
+          <a href="#usage">Usage</a>
+          
+        </li>
+      
+        <li>
+          <a href="#praetorian-configuration">Praetorian configuration</a>
+          
+        </li>
+      
+    </ul>
+    
+    
+  </div>
+  <div id="content">
+    
+    <h1>Praetorian</h1>
+<p><img src="http://raw.github.com/vdemeester/praetorian/master/imgs/praetorian.png"
+ alt="Praetorian logo" title="The man himself" align="right" /></p>
+<p>Praetorian is a command to be used as an ssh command that allow multiple
+commands for multiple ssh keys. It is similar to <a href="https://github.com/progrium/sshcommand">sshcommand</a>
+for the <code>$HOME/.ssh/authorized_keys</code> part, as it uses the same format.</p>
+<p>The basic idea is to allow a set of commands for an identity (a.k.a.
+an ssh key). Each identities are identified by an alias, a given
+name for the public keys.</p>
+<p><strong>Note : This is an alpha software, use at your own risk. There is still
+rough edges and it&#39;s not as secure as it should be.</strong></p>
+<h2 id='usage'>Usage</h2 id='usage'>
+<p>To setup praetorian, you&#39;ll need the ssh public key and that&#39;s pretty much it.</p>
+<pre><code><span class="variable">$ </span>cat ~<span class="regexp">/.id_rsa.pub | ssh user@host praetorian setup myalias</code></pre>
+<p>Next you need to edit the configuration file on the remote, see the <a href="#praetorian-configuration">next section</a>.
+Let say we add <code>ls</code> and <code>nc</code> as allowed commands (nc for allowing ssh gateway via ProxyCommand).
+Now you have some commands allowed, let&#39;s try it.</p>
+<pre><code><span class="variable">$ </span>ssh user<span class="variable">@host</span> ls
+src
+public_html
+<span class="variable">$ </span>ssh user<span class="variable">@host</span> pwd
+<span class="comment"># Nothing, just exit 1</span>
+praetorian-<span class="symbol">wrapper:</span> <span class="constant">Alias</span> gohei <span class="constant">Invalid</span> command pwd
+<span class="variable">$ </span>ssh user<span class="variable">@host</span> nc -w <span class="number">1</span> host2 <span class="number">22</span>
+(host2) $</code></pre>
+<!--
+Now, if the user identified with this ssh key is connecting, it will read the
+``$HOME/.ssh/praetorian`` file, on the remote, to look what commands are allowed.
+The commands are looked up by the given alias, and you can add commands on the
+remote using praetorian command.
+
+    (remote) $ praetorian add myalias rsync # will add rsync to the allowed commands
+
+There's few command still :
+
+    (remote) $ praetorian list myalias      # list the allowed commands for the alias
+
+    (remote) $ praetorian rm myalias rsync  # will remove rsync from the allowed commands
+    (remote) $ praetorian unset myalias     # remove the alias (and the keys) from the authorized_keys
+-->
+
+<h2 id='praetorian-configuration'>Praetorian configuration</h2 id='praetorian-configuration'>
+<p>The configuration file is located at <code>$HOME/.ssh/praetorian</code> and is, for the
+moment, a simple shell-like file.</p>
+<pre><code>(remote) <span class="variable">$ </span>cat <span class="variable">$HOME</span>/.ssh/praetorian
+myalias=<span class="string">"command1 command2 command3"</span>
+gohei=<span class="string">"nc cowsay"</span></code></pre>
+<!--
+## How does it works
+
+- Using ssh ``authorized_keys`` options
+- Reading config file and executing the wrapper command
+
+## Troubleshootings
+
+- ssh command to force password (if needed)
+- ssh command to force an identity (ssh key)
+-->
+
+  </div>
+</div>
+</body>
+</html>
