@@ -11,8 +11,8 @@ The basic idea is to allow a set of commands for an identity (a.k.a.
 an ssh key). Each identities are identified by an alias, a given
 name for the public keys.
 
-**Note : This is an alpha software that is not even finished. Use
-at your own risk ; though it should be usable in the next week**
+**Note : This is an alpha software, use at your own risk. There is still
+rough edges and it's not as secure as it should be.**
 
 ## Usage
 
