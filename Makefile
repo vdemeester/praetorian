@@ -37,7 +37,7 @@ build:
 	make install prefix=/usr sysconfdir=/etc DESTDIR=debian
 	fpm -s dir -t deb \
 		-n praetorian -v $(VERSION) --iteration $(BUILD) -a all \
-		-d coreutils -d dash -d dpkg -d openssh-server -d util-linux \
+		-d coreutils -d dash -d openssh-server -d util-linux \
 		-m "Vincent Demeester <vincent@sbr.pm>" \
 		--url "https://github.com/vdemeester/praetorian" \
 		--description "A ssh praetorian (bouncer, minder or whatever) ; it's just a cool restricted command script.." \
