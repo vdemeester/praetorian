@@ -69,3 +69,7 @@ moment, a simple shell-like file.
 - ssh command to force password (if needed)
 - ssh command to force an identity (ssh key)
 -->
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vdemeester/praetorian/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
