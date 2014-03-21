@@ -14,6 +14,8 @@ name for the public keys.
 **Note : This is an alpha software, use at your own risk. There is still
 rough edges and it's not as secure as it should be.**
 
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=vdemeester&url=http://github.com/vdemeester/praetorian&title=praetorian&language=&tags=github&category=software) 
+
 ## Usage
 
 To setup praetorian, you'll need the ssh public key and that's pretty much it.
