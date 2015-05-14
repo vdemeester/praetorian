@@ -1,5 +1,7 @@
 # Praetorian
 
+[![Join the chat at https://gitter.im/vdemeester/praetorian](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/vdemeester/praetorian?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 <img src="http://raw.github.com/vdemeester/praetorian/master/imgs/praetorian.png"
  alt="Praetorian logo" title="The man himself" align="right" />
 
