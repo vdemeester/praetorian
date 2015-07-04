@@ -4,5 +4,12 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func Setup(c *cli.Context) {
+var SetupCommand = cli.Command{
+	Name:   "setup",
+	Usage:  "Setup praetorian for the given user",
+	Action: setup,
+}
+
+func setup(c *cli.Context) {
+
 }

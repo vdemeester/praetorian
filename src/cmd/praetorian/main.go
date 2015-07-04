@@ -22,16 +22,8 @@ func main() {
 	app.Version = VERSION
 	app.Usage = DESCRIPTION
 	app.Commands = []cli.Command{
-		{
-			Name:   "exec",
-			Usage:  "Try to execute a command",
-			Action: praetorian.Exec,
-		},
-		{
-			Name:   "setup",
-			Usage:  "Setup praetorian for the given user",
-			Action: praetorian.Setup,
-		},
+		praetorian.ExecCommand,
+		praetorian.SetupCommand,
 	}
 
 	app.Run(os.Args)
