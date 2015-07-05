@@ -1,6 +1,6 @@
 # Praetorian
 
-[![Join the chat at https://gitter.im/vdemeester/praetorian](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/vdemeester/praetorian?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Circle CI](https://circleci.com/gh/vdemeester/praetorian.svg?style=svg)](https://circleci.com/gh/vdemeester/praetorian)
+[![Join the chat at https://gitter.im/vdemeester/praetorian](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/vdemeester/praetorian?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Circle CI](https://circleci.com/gh/vdemeester/praetorian.svg?style=svg)](https://circleci.com/gh/vdemeester/praetorian) [![Coverage Status](https://coveralls.io/repos/vdemeester/praetorian/badge.svg)](https://coveralls.io/r/vdemeester/praetorian)
 
 <img src="http://raw.github.com/vdemeester/praetorian/master/imgs/praetorian.png"
  alt="Praetorian logo" title="The man himself" align="right" />
