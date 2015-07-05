@@ -11,3 +11,7 @@ WORKDIR /usr/src/praetorian
 
 # Build it
 RUN gb build
+# Run tests
+RUN gb test
+
+CMD ["/usr/src/praetorian/bin/praetorian"]
