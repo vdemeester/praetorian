@@ -9,4 +9,4 @@ dependencies:
 
 test:
   override:
-    - docker run -d -p 9200:9200 vdemeester/praetorian; sleep 1
+    - docker run -ti vdemeester/praetorian; sleep 1
