@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+// Setup command that will setup the ssh magic
 var SetupCommand = cli.Command{
 	Name:   "setup",
 	Usage:  "Setup praetorian for the given user",
