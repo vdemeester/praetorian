@@ -13,6 +13,10 @@
 			"revision": "4831188890de893ae55d9ecd1bbafc340ce0ff9f",
 			"branch": "master",
 			"path": "/ssh/terminal"
+			"importpath": "github.com/BurntSushi/toml",
+			"repository": "https://github.com/BurntSushi/toml",
+			"revision": "056c9bc7be7190eaa7715723883caffa5f8fa3e4",
+			"branch": "master"
 		}
 	]
 }
