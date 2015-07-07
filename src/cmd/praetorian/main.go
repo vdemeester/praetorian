@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 	"praetorian"
-	commands "praetorian/commands"
+	"praetorian/commands"
 
 	"github.com/codegangsta/cli"
 )

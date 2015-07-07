@@ -1,4 +1,4 @@
-package praetorian
+package commands
 
 import (
 	"fmt"
