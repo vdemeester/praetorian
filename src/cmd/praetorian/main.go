@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"praetorian"
+	commands "praetorian/commands"
 
 	"github.com/codegangsta/cli"
 )
@@ -22,8 +22,8 @@ func main() {
 	app.Version = VERSION
 	app.Usage = DESCRIPTION
 	app.Commands = []cli.Command{
-		praetorian.ExecCommand,
-		praetorian.SetupCommand,
+		commands.ExecCommand,
+		commands.SetupCommand,
 	}
 
 	app.Run(os.Args)
