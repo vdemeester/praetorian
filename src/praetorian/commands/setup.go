@@ -6,26 +6,23 @@ import (
 	e "os/exec"
 	u "os/user"
 
-	"github.com/codegangsta/cli"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 )
 
-// Setup command that will setup the ssh magic
-var SetupCommand = cli.Command{
-	Name:   "setup",
-	Usage:  "Setup praetorian for the given user",
-	Action: setup,
+// SetupCommand command that will setup the ssh magic
+type SetupCommand struct {
+	Meta
 }
 
-func setup(c *cli.Context) {
-	if len(c.Args()) != 2 {
+func (c *SetupCommand) Run(args []string) int {
+	if len(args) != 2 {
 		fmt.Fprintf(os.Stderr, "setup commands needs two arguments : praetorian setup user name\n")
 		os.Exit(1)
 	}
-	username := c.Args().Get(0)
-	name := c.Args().Get(1)
+	username := args[0]
+	name := args[1]
 
 	// Does the user exists
 	user, err := u.Lookup(username)
@@ -91,4 +88,22 @@ func setup(c *cli.Context) {
 		// FIXME
 		panic(err)
 	}
+	return 0
+}
+
+// Synopsis is a one-line, short synopsis of the command.
+func (c *SetupCommand) Synopsis() string {
+	return "Setup praetorian for the given user"
+}
+
+// Help is a long-form help text that includes the command-line
+// usage, a brief few sentences explaining the function of the command,
+// and the complete list of flags the command accepts.
+func (c *SetupCommand) Help() string {
+	helpText := `
+Usage: praetorian setup user name
+  Setup praetorian for the given user, with the given name. 
+  One user can have multiple name.
+`
+	return strings.TrimSpace(helpText)
 }

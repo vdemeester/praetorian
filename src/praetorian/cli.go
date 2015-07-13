@@ -1,44 +1,46 @@
 package praetorian
 
 import (
-	"fmt"
 	"os"
 	"praetorian/commands"
 
-	"github.com/codegangsta/cli"
+	"github.com/mitchellh/cli"
+	"log"
 )
-
-// Application error
-type AppError struct {
-	message  string
-	exitCode int
-}
-
-func (e AppError) Error() string {
-	return e.message
-}
 
 // Run execute RunCustom() with color and output to Stdout/Stderr.
 // It returns exit code.
 func Run(args []string) int {
-	var exitCode = 0
+	meta := &commands.Meta{
+		UI: &cli.ColoredUi{
+			InfoColor:  cli.UiColorBlue,
+			ErrorColor: cli.UiColorRed,
+			Ui: &cli.BasicUi{
+				Writer:      os.Stdout,
+				ErrorWriter: os.Stderr,
+				Reader:      os.Stdin,
+			},
+		}}
 
-	app := cli.NewApp()
-	app.Name = Name
-	app.Version = Version
-	app.Usage = Description
-	app.Commands = []cli.Command{
-		commands.ExecCommand,
-		commands.SetupCommand,
+	c := cli.NewCLI(Name, Version)
+	c.Args = os.Args[1:]
+	c.Commands = map[string]cli.CommandFactory{
+		"exec": func() (cli.Command, error) {
+			return &commands.ExecCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"setup": func() (cli.Command, error) {
+			return &commands.SetupCommand{
+				Meta: *meta,
+			}, nil
+		},
 	}
 
-	err := app.Run(args)
+	exitStatus, err := c.Run()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to execute: %s\n", err.Error())
-	}
-	if err, ok := err.(AppError); ok {
-		exitCode = err.exitCode
+		log.Println(err)
 	}
 
-	return exitCode
+	return exitStatus
 }

@@ -3,7 +3,6 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"github.com/codegangsta/cli"
 	"os"
 	e "os/exec"
 	u "os/user"
@@ -11,14 +10,12 @@ import (
 	"strings"
 )
 
-// Exec a command, it is the wrapper
-var ExecCommand = cli.Command{
-	Name:   "exec",
-	Usage:  "Try to execute a command",
-	Action: exec,
+// ExecCommand a command, it is the wrapper
+type ExecCommand struct {
+	Meta
 }
 
-func exec(c *cli.Context) {
+func (c *ExecCommand) Run(args []string) int {
 	// Environment variable set in .authorized_keys
 	// SSH_ORIGINAL_COMMAND
 	sshOriginalCommand := os.Getenv("SSH_ORIGINAL_COMMAND")
@@ -48,9 +45,9 @@ func exec(c *cli.Context) {
 	}
 	parts := strings.SplitN(sshOriginalCommand, " ", 2)
 	command := parts[0]
-	args := []string{}
+	sshargs := []string{}
 	if len(parts) == 2 {
-		args = strings.Split(parts[1], " ")
+		sshargs = strings.Split(parts[1], " ")
 	}
 
 	allowed := false
@@ -64,11 +61,11 @@ func exec(c *cli.Context) {
 	}
 
 	if allowed {
-		cmd := e.Command(command, args...)
+		cmd := e.Command(command, sshargs...)
 		cmd.Stderr = os.Stderr
 		cmd.Stdout = os.Stdout
 		if err := cmd.Run(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while running : %s %s", command, strings.Join(args, " "))
+			fmt.Fprintf(os.Stderr, "Error while running : %s %s", command, strings.Join(sshargs, " "))
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -76,6 +73,23 @@ func exec(c *cli.Context) {
 		fmt.Fprintf(os.Stderr, "Alias %s Invalid command %s", name, sshOriginalCommand)
 		os.Exit(1)
 	}
+	return 0
+}
+
+// Synopsis is a one-line, short synopsis of the command.
+func (c *ExecCommand) Synopsis() string {
+	return "Try to execute a command"
+}
+
+// Help is a long-form help text that includes the command-line
+// usage, a brief few sentences explaining the function of the command,
+// and the complete list of flags the command accepts.
+func (c *ExecCommand) Help() string {
+	helpText := `
+Usage: praetorian exec commands [args]
+  Try to execute a command. 
+`
+	return strings.TrimSpace(helpText)
 }
 
 func parseConfigurationFile(filename string) (map[string][]string, error) {
@@ -108,24 +122,3 @@ func parseConfigurationFile(filename string) (map[string][]string, error) {
 }
 
 var whiteSpaces = " \t"
-
-/*
-
-# Using magic :)
-COMMANDS="${!NAME}"
-
-for COMMAND in ${COMMANDS}; do
-    if [[ "${SSH_ORIGINAL_COMMAND}" = ${COMMAND}* ]]; then
-        logger --tag ${__BASE__} -- "Alias ${NAME} Executing ${SSH_ORIGINAL_COMMAND}"
-        COMMAND_FOUND=${COMMAND}
-        $SSH_ORIGINAL_COMMAND
-        # And exiting with the last code
-        exit $?
-    fi
-done
-
-test -z $COMMAND_FOUND && {
-    logger --tag ${__BASE__} --stderr -- "Alias ${NAME} Invalid command ${SSH_ORIGINAL_COMMAND}"
-    exit 1
-}
-*/
