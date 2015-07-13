@@ -3,12 +3,13 @@ package commands
 import (
 	"fmt"
 	"os"
-	e "os/exec"
 	u "os/user"
 
 	"io/ioutil"
 	"path/filepath"
 	"strings"
+
+	"praetorian/ssh"
 )
 
 // SetupCommand command that will setup the ssh magic
@@ -40,27 +41,12 @@ func (c *SetupCommand) Run(args []string) int {
 	}
 
 	// Let's get the fingerprint of the key
-	// Create a temporary file
-	keyFile, err := ioutil.TempFile("", username)
+	sshKey := ssh.NewPublicSSHKey(username, string(key))
+	keyFingerPrint, err := sshKey.FingerPrint()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error %v", err)
-		os.Exit(1)
+		fmt.Fprintf(os.Stderr, err.Error())
+		return 1
 	}
-	ioutil.WriteFile(keyFile.Name(), key, 0600)
-
-	// Use ssh-keygen
-	cmd := e.Command("ssh-keygen", "-lf", keyFile.Name())
-	output, err := cmd.Output()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while getting ssh fingerprint : %s, %s (%s)", err, output, strings.Join(cmd.Args, " "))
-		os.Exit(1)
-	}
-	parts := strings.SplitN(string(output), " ", 3)
-	if len(parts) != 3 {
-		fmt.Fprintf(os.Stderr, "Error while getting ssh fingerprint : %s, %s (%s)", err, output, strings.Join(cmd.Args, " "))
-		os.Exit(1)
-	}
-	keyFingerPrint := parts[1]
 
 	sshConfDir := filepath.Join(user.HomeDir, ".ssh")
 	sshConfFile := filepath.Join(sshConfDir, "authorized_keys")
