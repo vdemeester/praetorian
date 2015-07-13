@@ -30,14 +30,14 @@ func (c *SetupCommand) Run(args []string) int {
 	user, err := u.Lookup(username)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "User %s does not exists, aborting.\n", username)
-		os.Exit(1)
+		return 1
 	}
 
 	// Read key from stdin
 	key, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading from stdin\n")
-		os.Exit(1)
+		return 1
 	}
 
 	// Let's get the fingerprint of the key
@@ -66,14 +66,16 @@ func (c *SetupCommand) Run(args []string) int {
 	f, err := os.OpenFile(sshConfFile, os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
 		// FIXME
-		panic(err)
+		fmt.Fprintf(os.Stderr, err.Error())
+		return 1
 	}
 
 	defer f.Close()
 
 	if _, err = f.WriteString(sshMagicString); err != nil {
 		// FIXME
-		panic(err)
+		fmt.Fprintf(os.Stderr, err.Error())
+		return 1
 	}
 	return 0
 }

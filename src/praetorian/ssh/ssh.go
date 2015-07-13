@@ -42,6 +42,7 @@ func (key *PublicSSHKey) FingerPrint() (string, error) {
 	return parts[1], nil
 }
 
+// WriteToTemp Write the content to a temporary file
 func (key *PublicSSHKey) WriteToTemp() (*os.File, error) {
 	if key.username == "" {
 		return nil, fmt.Errorf("username cannot be nil or empty")
