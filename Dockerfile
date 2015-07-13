@@ -11,14 +11,3 @@ RUN go get github.com/constabulary/gb/... && \
 # Copy project inside
 COPY . /usr/src/praetorian
 WORKDIR /usr/src/praetorian
-
-# Build it
-RUN gb build
-# Run tests
-RUN gb test -cover
-# Gofmt
-RUN test -z "$(gofmt -s -l -w src | tee /dev/stderr)"
-# Golint
-RUN test -z "$(golint src/... | tee /dev/stderr)"
-
-CMD ["/usr/src/praetorian/bin/praetorian"]
