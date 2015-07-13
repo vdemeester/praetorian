@@ -7,10 +7,10 @@ import (
 
 func TestPublicSSHKeyWriteToTempErrors(t *testing.T) {
 	invalid := []PublicSSHKey{
-		PublicSSHKey{
+		{
 			content: "some content",
 		},
-		PublicSSHKey{
+		{
 			username: "",
 			content:  "some content",
 		},
@@ -42,10 +42,10 @@ func TestPublicSSHKeyWriteToTemp(t *testing.T) {
 
 func TestPublicSSHKeyFingerPrintErrors(t *testing.T) {
 	invalid := []PublicSSHKey{
-		PublicSSHKey{
+		{
 			content: "some content",
 		},
-		PublicSSHKey{
+		{
 			username: "username",
 			content:  "some content",
 		},
