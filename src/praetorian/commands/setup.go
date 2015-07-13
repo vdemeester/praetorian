@@ -16,6 +16,7 @@ type SetupCommand struct {
 	Meta
 }
 
+// Run The setup command
 func (c *SetupCommand) Run(args []string) int {
 	if len(args) != 2 {
 		fmt.Fprintf(os.Stderr, "setup commands needs two arguments : praetorian setup user name\n")

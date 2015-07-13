@@ -15,6 +15,7 @@ type ExecCommand struct {
 	Meta
 }
 
+// Run The exec command
 func (c *ExecCommand) Run(args []string) int {
 	// Environment variable set in .authorized_keys
 	// SSH_ORIGINAL_COMMAND
