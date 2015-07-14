@@ -5,9 +5,10 @@ machine:
 dependencies:
   override:
     - docker info
-    - docker build -t vdemeester/praetorian .
+    - make binary
+    - make validate
 
 test:
   override:
-    - docker run -ti vdemeester/praetorian; sleep 1
-    - docker run -ti -e COVERWALLS_TOKEN vdemeester/praetorian sh -c "gover && goveralls -service drone.io -coverprofile=gover.coverprofile -repotoken ${COVERWALLS_TOKEN}"
+    - make test
+    - make test-coverage

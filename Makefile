@@ -2,11 +2,11 @@
 
 
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
-DOCKER_IMAGE := docker-dev$(if $(GIT_BRANCH),:$(GIT_BRANCH))
+DOCKER_IMAGE := praetorian-dev$(if $(GIT_BRANCH),:$(GIT_BRANCH))
 # DOCKER_MOUNT := -v "$(CURDIR)/bin:/usr/src/praetorian/bin" -v "$(CURDIR)/pkg:/usr/src/praetorian/pkg"
 
 # DOCKER_RUN_PRAETORIAN := docker run --rm -it $(DOCKER_MOUNT) "$(DOCKER_IMAGE)"
-DOCKER_RUN_PRAETORIAN := docker run --rm -it "$(DOCKER_IMAGE)"
+DOCKER_RUN_PRAETORIAN := docker run $(if $(CIRCLECI),,--rm) -e COVERWALLS_TOKEN -it "$(DOCKER_IMAGE)"
 
 all: validate build test
 

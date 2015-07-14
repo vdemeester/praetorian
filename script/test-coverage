@@ -1,2 +1,28 @@
 #!/bin/sh
 set -e
+
+# FIXME this is soooo ugly
+ln -s $PWD/src/cmd/praetorian /usr/src/go/src/cmd/praetorian
+ln -s $PWD/src/praetorian /usr/src/go/src/praetorian
+
+export PROJECT=$PWD
+MODE="mode: count"
+
+# Grab the list of packages.
+# Exclude the API and CLI from coverage as it will be covered by integration tests.
+PACKAGES=`gb list`
+
+# Create the empty coverage file.
+echo $MODE > goverage.report
+
+echo $PACKAGES
+# Run coverage on every package.
+for package in $PACKAGES; do
+	output="$PROJECT/src/$package/coverage.out"
+
+        GOPATH=$PROJECT:$PROJECT/vendor go test -test.short -covermode=count -coverprofile=$output $package
+	if [ -f "$output" ] ; then
+		cat "$output" | grep -v "$MODE" >> goverage.report
+	fi
+done
+goveralls -service drone.io -coverprofile=goverage.report -repotoken ${COVERWALLS_TOKEN}
