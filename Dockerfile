@@ -1,5 +1,5 @@
 ## -*- docker-image-name: "vdemeester/praetorian-build" -*-
-FROM golang:1.4.2
+FROM golang:1.6
 MAINTAINER Vincent Demeester <vincent@sbr.pm>
 
 # Install gb
