@@ -57,7 +57,7 @@ var validateCmd = &cobra.Command{
 		}
 
 		if !allowed {
-			fmt.Fprintf(os.Stderr, "Alias %s Invalid command %s", name, sshOriginalCommand)
+			fmt.Fprintf(os.Stderr, "Alias %s: Invalid command %s\n", name, sshOriginalCommand)
 			os.Exit(1)
 		}
 	},
