@@ -1,6 +1,9 @@
 # Praetorian
 
-[![Join the chat at https://gitter.im/vdemeester/praetorian](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/vdemeester/praetorian?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Circle CI](https://circleci.com/gh/vdemeester/praetorian.svg?style=svg)](https://circleci.com/gh/vdemeester/praetorian) [![Coverage Status](https://coveralls.io/repos/vdemeester/praetorian/badge.svg?branch=master&service=github)](https://coveralls.io/github/vdemeester/praetorian?branch=master)
+[![Join the chat at https://gitter.im/vdemeester/praetorian](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/vdemeester/praetorian?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
+[![Build Status](https://travis-ci.org/vdemeester/praetorian.svg?branch=add-readme)](https://travis-ci.org/vdemeester/praetorian)
+[![Go Report Card](https://goreportcard.com/badge/github.com/vdemeester/praetorian)](https://goreportcard.com/report/github.com/vdemeester/praetorian)
+[![License](https://img.shields.io/github/license/vdemeester/praetorian.svg)]()
 
 <img src="http://raw.github.com/vdemeester/praetorian/master/imgs/praetorian.png"
  alt="Praetorian logo" title="The man himself" align="right" />
