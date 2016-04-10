@@ -4,7 +4,7 @@ LIBCOMPOSE_ENVS := \
 	-e DOCKER_TEST_HOST \
 	-e TESTFLAGS
 
-BIND_DIR := "dist"
+BIND_DIR := "bundles"
 PRAETORIAN_MOUNT := -v "$(CURDIR)/$(BIND_DIR):/go/src/github.com/vdemeester/praetorian/$(BIND_DIR)"
 
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
