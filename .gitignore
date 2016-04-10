@@ -1,4 +1,4 @@
-pkg
-bin/praetorian
+*.test
 *.out
 *.coverprofile
+bundles

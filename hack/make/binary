@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+# Build binaries
+go build \
+   -ldflags="-w -X github.com/vdemeester/praetorian/version.GitCommit=`git rev-parse --short HEAD`" \
+   -o bundles/praetorian \
+   ${PRAETORIAN_PKG}
