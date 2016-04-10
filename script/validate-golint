@@ -1,4 +1,0 @@
-#!/bin/sh
-set -e
-# golint on src (skipping vendor)
-test -z "$(golint src/... | tee /dev/stderr)"

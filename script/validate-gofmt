@@ -1,4 +1,0 @@
-#!/bin/sh
-set -e
-# Test gofmt on src (skipping vendor)
-test -z "$(gofmt -s -l -w src | tee /dev/stderr)"

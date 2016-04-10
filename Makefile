@@ -1,40 +1,53 @@
-.PHONY: all binay test test-unit test-integration test-coverage validate-gofmt validate-golint validate build
+.PHONY: all
 
+LIBCOMPOSE_ENVS := \
+	-e DOCKER_TEST_HOST \
+	-e TESTFLAGS
+
+BIND_DIR := "dist"
+PRAETORIAN_MOUNT := -v "$(CURDIR)/$(BIND_DIR):/go/src/github.com/vdemeester/praetorian/$(BIND_DIR)"
 
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
-DOCKER_IMAGE := praetorian-dev$(if $(GIT_BRANCH),:$(GIT_BRANCH))
-# DOCKER_MOUNT := -v "$(CURDIR)/bin:/usr/src/praetorian/bin" -v "$(CURDIR)/pkg:/usr/src/praetorian/pkg"
+PRAETORIAN_DEV_IMAGE := praetorian-dev$(if $(GIT_BRANCH),:$(GIT_BRANCH))
+REPONAME := $(shell echo $(REPO) | tr '[:upper:]' '[:lower:]')
+INTEGRATION_OPTS := $(if $(MAKE_DOCKER_HOST),-e "DOCKER_HOST=$(MAKE_DOCKER_HOST)", -v "/var/run/docker.sock:/var/run/docker.sock")
 
-# DOCKER_RUN_PRAETORIAN := docker run --rm -it $(DOCKER_MOUNT) "$(DOCKER_IMAGE)"
-DOCKER_RUN_PRAETORIAN := docker run $(if $(CIRCLECI),,--rm) -e COVERWALLS_TOKEN -it "$(DOCKER_IMAGE)"
+DOCKER_RUN_PRAETORIAN := docker run $(if $(CIRCLECI),,--rm) $(INTEGRATION_OPTS) -it $(PRAETORIAN_ENVS) $(PRAETORIAN_MOUNT) "$(PRAETORIAN_DEV_IMAGE)"
 
-all: validate build test
+default: all
 
-build:
-	docker build -t "$(DOCKER_IMAGE)" .
+all: build ## validate all checks, build the binary, run all tests
+	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh
 
-binary: build
-	$(DOCKER_RUN_PRAETORIAN) script/binary
+binary: build ## build the binary
+	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh binary
 
+test: build ## run the unit and integration tests
+	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh test-unit test-integration
 
-test: test-unit test-integration
+test-integration: build ## run the integration tests
+	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh test-integration
 
-test-unit: build
-	$(DOCKER_RUN_PRAETORIAN) script/test-unit
+test-unit: build ## run the unit tests
+	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh test-unit
 
-test-integration: build
-	$(DOCKER_RUN_PRAETORIAN) script/test-integration
+validate: build ## validate gofmt, golint and go vet
+	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh validate-gofmt validate-govet validate-golint
 
-test-coverage: test-unit
-	$(DOCKER_RUN_PRAETORIAN) script/test-coverage
+lint:
+	./hack/make.sh validate-golint
 
-validate-gofmt: build
-	$(DOCKER_RUN_PRAETORIAN) script/validate-gofmt
+fmt:
+	./hack/make.sh validate-gofmt
 
-validate-golint: build
-	$(DOCKER_RUN_PRAETORIAN) script/validate-golint
+build: bundles
+	docker build -t "$(PRAETORIAN_DEV_IMAGE)" .
 
-validate: validate-gofmt validate-golint
+shell: build ## start a shell inside the build env
+	$(DOCKER_RUN_PRAETORIAN) /bin/bash
 
-shell: build
-       $(DOCKER_RUN_PRAETORIAN) bash
+bundles:
+	mkdir bundles
+
+help: ## this help
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
