@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	e "os/exec"
 	u "os/user"
 	"path/filepath"
 	"strings"
@@ -12,11 +11,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// execCmd represents the exec command
-var execCmd = &cobra.Command{
-	Use:   "exec commands",
-	Short: "Try to execute a command.",
-	Long:  `Try to execute a command`,
+// validateCmd represents the validate command
+var validateCmd = &cobra.Command{
+	Use:   "validate commands",
+	Short: "Checks if a command is allowed to be executed.",
+	Long:  `Checks if a command is allowed to be executed.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// Environment variable set in .authorized_keys
@@ -48,14 +47,8 @@ var execCmd = &cobra.Command{
 		}
 		parts := strings.SplitN(sshOriginalCommand, " ", 2)
 		command := parts[0]
-		sshargs := []string{}
-		if len(parts) == 2 {
-			sshargs = strings.Split(parts[1], " ")
-		}
-
 		allowed := false
 
-		fmt.Printf("%s in %v", command, allowedCommands)
 		for _, allowedCommand := range allowedCommands[name] {
 			if command == allowedCommand {
 				allowed = true
@@ -63,16 +56,7 @@ var execCmd = &cobra.Command{
 			}
 		}
 
-		if allowed {
-			cmd := e.Command(command, sshargs...)
-			cmd.Stderr = os.Stderr
-			cmd.Stdout = os.Stdout
-			if err := cmd.Run(); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while running : %s %s", command, strings.Join(sshargs, " "))
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
-		} else {
+		if !allowed {
 			fmt.Fprintf(os.Stderr, "Alias %s Invalid command %s", name, sshOriginalCommand)
 			os.Exit(1)
 		}
@@ -80,7 +64,7 @@ var execCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(execCmd)
+	RootCmd.AddCommand(validateCmd)
 }
 
 func parseConfigurationFile(filename string) (map[string][]string, error) {

@@ -77,7 +77,7 @@ One user (represented by its ssh public key) can have multiple name.`,
 
 		// Put the magic string at the end of sshConfFile
 		finalKey := strings.TrimSpace(string(key))
-		sshMagicString := fmt.Sprintf(`%s command="FINGERPRINT=%s NAME=%s praetorian exec $SSH_ORIGINAL_COMMAND",no-X11-forwarding`, finalKey, keyFingerPrint, name)
+		sshMagicString := fmt.Sprintf(`command="FINGERPRINT=%s NAME=%s praetorian exec '$SSH_ORIGINAL_COMMAND' && $SSH_ORIGINAL_COMMAND",no-X11-forwarding %s`, keyFingerPrint, name, finalKey)
 
 		f, err := os.OpenFile(sshConfFile, os.O_APPEND|os.O_WRONLY, 0600)
 		if err != nil {
