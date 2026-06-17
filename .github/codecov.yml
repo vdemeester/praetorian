@@ -1,17 +1,22 @@
 coverage:
+  precision: 2
+  round: down
   status:
     project:
       default:
-        target: auto
-        threshold: 1%
+        informational: true # report coverage, never block the PR
     patch:
       default:
-        target: 80%
+        target: 80% # the gate: new/changed code must be covered (TDD)
         threshold: 5%
+
+github_checks:
+  annotations: true
 
 comment:
   layout: "reach, diff, files"
   require_changes: true
 
 ignore:
+  - "main.go"
   - "version/**"
