@@ -81,8 +81,9 @@ apply to the arguments that follow.
 ## Subcommands
 
 - `praetorian run <alias>` — production gate (use in `authorized_keys`).
-- `praetorian check` — diagnostics: validate config, or simulate a command
-  with `--alias` + `--command`.
+- `praetorian check` — diagnostics: validate config, simulate a command with
+  `--alias` + `--command`, or cross-check an `authorized_keys` file with
+  `--authorized-keys` (add `--strict` to fail on informational notes too).
 - `praetorian version` — version info.
 
 ```console
