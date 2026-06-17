@@ -55,4 +55,12 @@ tidy:
 
 .PHONY: clean
 clean:
-	rm -rf $(BIN_DIR) coverage.out
+	rm -rf $(BIN_DIR) coverage.out dist
+
+.PHONY: snapshot
+snapshot:
+	goreleaser release --snapshot --clean
+
+.PHONY: release-check
+release-check:
+	goreleaser check

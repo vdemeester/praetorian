@@ -102,7 +102,22 @@ make build    # build the binary into ./bin
 make test     # run unit tests
 make lint     # golangci-lint
 make check    # fmt + vet + lint + test
+make snapshot # build a local goreleaser snapshot (no publish)
 ```
+
+## Releasing
+
+Releases are cut by [goreleaser](https://goreleaser.com) when a `v*` tag is
+pushed:
+
+```sh
+git tag -a v2.0.0 -m "praetorian 2.0.0"
+git push origin v2.0.0
+```
+
+The `release` workflow builds static `linux`/`darwin` `amd64`/`arm64` binaries,
+produces checksums, and publishes a GitHub release. Validate config locally
+with `make release-check`.
 
 ## License
 
