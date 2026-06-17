@@ -1,9 +1,10 @@
 # Praetorian
 
-[![CI](https://github.com/vdemeester/praetorian/actions/workflows/ci.yaml/badge.svg)](https://github.com/vdemeester/praetorian/actions/workflows/ci.yaml)
+[![CI](https://github.com/vdemeester/praetorian/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/vdemeester/praetorian/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/vdemeester/praetorian/branch/main/graph/badge.svg)](https://codecov.io/gh/vdemeester/praetorian)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vdemeester/praetorian)](https://goreportcard.com/report/github.com/vdemeester/praetorian)
-[![License](https://img.shields.io/github/license/vdemeester/praetorian.svg)]()
+[![Go Reference](https://pkg.go.dev/badge/github.com/vdemeester/praetorian.svg)](https://pkg.go.dev/github.com/vdemeester/praetorian)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 <img src="imgs/praetorian.png" alt="Praetorian logo" title="The man himself" align="right" />
 
