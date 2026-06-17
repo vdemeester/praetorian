@@ -1,6 +1,7 @@
 # Praetorian
 
 [![CI](https://github.com/vdemeester/praetorian/actions/workflows/ci.yaml/badge.svg)](https://github.com/vdemeester/praetorian/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/vdemeester/praetorian/branch/main/graph/badge.svg)](https://codecov.io/gh/vdemeester/praetorian)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vdemeester/praetorian)](https://goreportcard.com/report/github.com/vdemeester/praetorian)
 [![License](https://img.shields.io/github/license/vdemeester/praetorian.svg)]()
 
