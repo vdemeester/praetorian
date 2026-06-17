@@ -1,82 +1,106 @@
 # Praetorian
 
-[![Join the chat at https://gitter.im/vdemeester/praetorian](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/vdemeester/praetorian?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
-[![Build Status](https://travis-ci.org/vdemeester/praetorian.svg?branch=master)](https://travis-ci.org/vdemeester/praetorian)
+[![CI](https://github.com/vdemeester/praetorian/actions/workflows/ci.yaml/badge.svg)](https://github.com/vdemeester/praetorian/actions/workflows/ci.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vdemeester/praetorian)](https://goreportcard.com/report/github.com/vdemeester/praetorian)
 [![License](https://img.shields.io/github/license/vdemeester/praetorian.svg)]()
 
-<img src="http://raw.github.com/vdemeester/praetorian/master/imgs/praetorian.png"
- alt="Praetorian logo" title="The man himself" align="right" />
+<img src="imgs/praetorian.png" alt="Praetorian logo" title="The man himself" align="right" />
 
-Praetorian is a command to be used as an ssh command that allow multiple
-commands for multiple ssh keys. It is similar to [sshcommand](https://github.com/progrium/sshcommand)
-for the ``$HOME/.ssh/authorized_keys`` part, as it uses the same format.
+Praetorian is an **SSH command restrictor**. It is used as the target of a
+`command="..."` directive in `authorized_keys` and validates the command a
+client tries to run against a per-alias allow-list before executing it
+**directly, without a shell**.
 
-The basic idea is to allow a set of commands for an identity (a.k.a.
-an ssh key). Each identities are identified by an alias, a given
-name for the public keys.
+> **2.0 rewrite.** This is a ground-up rewrite of the original (2014–2016)
+> praetorian. The legacy implementation is preserved in git history and tagged
+> `0.1.2`.
 
-**Note : This is an alpha software, use at your own risk. There is still
-rough edges and it's not as secure as it should be. And it's being re-written in golang.. :D**
+## Security model
 
-[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=vdemeester&url=http://github.com/vdemeester/praetorian&title=praetorian&language=&tags=github&category=software) 
+- **Default-deny** — anything not explicitly allowed is denied.
+- **No shell, ever** — the command is tokenized with a shell-like lexer
+  ([`google/shlex`](https://github.com/google/shlex)) and run via
+  `syscall.Exec`. `$()`, backticks, `;`, `|` are inert bytes.
+- **TOCTOU-free** — what praetorian validates is exactly what it execs; there is
+  no shell re-interpretation gap.
+- **Allow-only with narrowing** — there are no top-level deny rules; denial only
+  exists as narrowing constraints inside allow rules.
 
 ## Usage
 
-To setup praetorian, you'll need the ssh public key and that's pretty much it.
+In `authorized_keys`:
 
-    $ cat ~/.id_rsa.pub | ssh user@host praetorian setup myalias
+```
+command="praetorian run okinawa-tpm",no-pty,no-port-forwarding ssh-ed25519 AAAA... user@host
+```
 
-Next you need to edit the configuration file on the remote, see the [next section](#praetorian-configuration).
-Let say we add ``ls`` and ``nc`` as allowed commands (nc for allowing ssh gateway via ProxyCommand).
-Now you have some commands allowed, let's try it.
+`sshd` sets `SSH_ORIGINAL_COMMAND`; praetorian validates it against the
+`okinawa-tpm` alias and execs or denies.
 
-    $ ssh user@host ls
-    src
-    public_html
-    $ ssh user@host pwd
-    # Nothing, just exit 1
-    praetorian-wrapper: Alias gohei Invalid command pwd
-    $ ssh user@host nc -w 1 host2 22
-    (host2) $
+### Configuration
 
-<!--
-Now, if the user identified with this ssh key is connecting, it will read the
-``$HOME/.ssh/praetorian`` file, on the remote, to look what commands are allowed.
-The commands are looked up by the given alias, and you can add commands on the
-remote using praetorian command.
+Written in HCL (and equally parseable as JSON — Nix can generate the JSON form):
 
-    (remote) $ praetorian add myalias rsync # will add rsync to the allowed commands
+```hcl
+alias "okinawa-tpm" {
+  allow "borg serve" {}              # required token prefix, any trailing args
 
-There's few command still :
+  allow "git-upload-pack" {
+    arg { pos = 1, glob = "/srv/git/*" }
+    num_args = 1
+  }
 
-    (remote) $ praetorian list myalias      # list the allowed commands for the alias
+  allow "rsync" {
+    any_arg = "/srv/backup/*"          # at least one arg must match
+    no_arg  = "/srv/backup/.secret/*"  # narrowing: no arg may match
+  }
+}
+```
 
-    (remote) $ praetorian rm myalias rsync  # will remove rsync from the allowed commands
-    (remote) $ praetorian unset myalias     # remove the alias (and the keys) from the authorized_keys
--->
+Config lookup order (first found wins, **no merge**):
 
-## Praetorian configuration
+1. `--config PATH`
+2. `~/.config/praetorian/config.hcl`
+3. `/etc/praetorian/config.hcl`
 
-The configuration file is located at ``$HOME/.ssh/praetorian`` and is, for the
-moment, a simple shell-like file.
+#### Constraints
 
-    (remote) $ cat $HOME/.ssh/praetorian
-    myalias="command1 command2 command3"
-    gohei="nc cowsay"
+| Constraint            | Syntax                          | Meaning                                            |
+| --------------------- | ------------------------------- | -------------------------------------------------- |
+| none                  | `allow "cmd" {}`                | command/prefix match only, any args                |
+| positional arg        | `arg { pos = N, glob = "..." }` | arg at 1-based position N matches glob (`-1`=last) |
+| any arg               | `any_arg = "..."`               | at least one arg matches                           |
+| no arg (narrowing)    | `no_arg = "..."`                | no arg may match                                   |
+| arg count             | `num_args = N`                  | exactly N args                                      |
 
-<!--
-## How does it works
+The `allow` label is shlex-split into a required token prefix: the first token
+is the executable, remaining tokens are required leading arguments; constraints
+apply to the arguments that follow.
 
-- Using ssh ``authorized_keys`` options
-- Reading config file and executing the wrapper command
+## Subcommands
 
-## Troubleshootings
+- `praetorian run <alias>` — production gate (use in `authorized_keys`).
+- `praetorian check` — diagnostics: validate config, or simulate a command
+  with `--alias` + `--command`.
+- `praetorian version` — version info.
 
-- ssh command to force password (if needed)
-- ssh command to force an identity (ssh key)
--->
+```console
+$ praetorian check --config examples/config.hcl --alias okinawa-tpm --command "rm -rf /"
+✗ Alias: okinawa-tpm
+✗ Command: rm
+✗ denied: prefix mismatch
+→ DENIED
+```
 
+## Development
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vdemeester/praetorian/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+```sh
+make build    # build the binary into ./bin
+make test     # run unit tests
+make lint     # golangci-lint
+make check    # fmt + vet + lint + test
+```
 
+## License
+
+See [LICENSE](LICENSE).

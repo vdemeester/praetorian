@@ -1,53 +1,58 @@
+BINARY      := praetorian
+BIN_DIR     := bin
+PKG         := github.com/vdemeester/praetorian
+
+VERSION     ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+COMMIT      ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
+DATE        ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+
+LDFLAGS := -s -w \
+	-X $(PKG)/version.Version=$(VERSION) \
+	-X $(PKG)/version.Commit=$(COMMIT) \
+	-X $(PKG)/version.Date=$(DATE)
+
+GO       ?= go
+GOFLAGS  ?=
+
 .PHONY: all
+all: check build
 
-LIBCOMPOSE_ENVS := \
-	-e DOCKER_TEST_HOST \
-	-e TESTFLAGS
+.PHONY: build
+build:
+	CGO_ENABLED=0 $(GO) build $(GOFLAGS) -trimpath -ldflags '$(LDFLAGS)' -o $(BIN_DIR)/$(BINARY) .
 
-BIND_DIR := "bundles"
-PRAETORIAN_MOUNT := -v "$(CURDIR)/$(BIND_DIR):/go/src/github.com/vdemeester/praetorian/$(BIND_DIR)"
+.PHONY: install
+install:
+	CGO_ENABLED=0 $(GO) install $(GOFLAGS) -trimpath -ldflags '$(LDFLAGS)' .
 
-GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
-PRAETORIAN_DEV_IMAGE := praetorian-dev$(if $(GIT_BRANCH),:$(GIT_BRANCH))
-REPONAME := $(shell echo $(REPO) | tr '[:upper:]' '[:lower:]')
-INTEGRATION_OPTS := $(if $(MAKE_DOCKER_HOST),-e "DOCKER_HOST=$(MAKE_DOCKER_HOST)", -v "/var/run/docker.sock:/var/run/docker.sock")
+.PHONY: test
+test:
+	$(GO) test -race -cover ./...
 
-DOCKER_RUN_PRAETORIAN := docker run $(if $(CIRCLECI),,--rm) $(INTEGRATION_OPTS) -it $(PRAETORIAN_ENVS) $(PRAETORIAN_MOUNT) "$(PRAETORIAN_DEV_IMAGE)"
+.PHONY: coverage
+coverage:
+	$(GO) test -coverprofile=coverage.out ./...
+	$(GO) tool cover -func=coverage.out
 
-default: all
-
-all: build ## validate all checks, build the binary, run all tests
-	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh
-
-binary: build ## build the binary
-	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh binary
-
-test: build ## run the unit and integration tests
-	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh test-unit test-integration
-
-test-integration: build ## run the integration tests
-	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh test-integration
-
-test-unit: build ## run the unit tests
-	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh test-unit
-
-validate: build ## validate gofmt, golint and go vet
-	$(DOCKER_RUN_PRAETORIAN) ./hack/make.sh validate-gofmt validate-govet validate-golint
-
-lint:
-	./hack/make.sh validate-golint
-
+.PHONY: fmt
 fmt:
-	./hack/make.sh validate-gofmt
+	$(GO) fmt ./...
 
-build: bundles
-	docker build -t "$(PRAETORIAN_DEV_IMAGE)" .
+.PHONY: vet
+vet:
+	$(GO) vet ./...
 
-shell: build ## start a shell inside the build env
-	$(DOCKER_RUN_PRAETORIAN) /bin/bash
+.PHONY: lint
+lint:
+	golangci-lint run ./...
 
-bundles:
-	mkdir bundles
+.PHONY: check
+check: fmt vet lint test
 
-help: ## this help
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+.PHONY: tidy
+tidy:
+	$(GO) mod tidy
+
+.PHONY: clean
+clean:
+	rm -rf $(BIN_DIR) coverage.out

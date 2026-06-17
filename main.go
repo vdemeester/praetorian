@@ -1,21 +1,15 @@
-// Copyright © 2016 NAME HERE <EMAIL ADDRESS>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
+// Command praetorian is an SSH command restrictor. It is used as the target of
+// a `command="praetorian run <alias>"` directive in authorized_keys, and
+// validates SSH_ORIGINAL_COMMAND against an allow-list before executing it
+// directly (no shell).
 package main
 
-import "github.com/vdemeester/praetorian/cmd"
+import (
+	"os"
+
+	"github.com/vdemeester/praetorian/internal/cli"
+)
 
 func main() {
-	cmd.Execute()
+	os.Exit(cli.Main(os.Args[1:]))
 }

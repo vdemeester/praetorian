@@ -1,4 +1,7 @@
 *.test
 *.out
 *.coverprofile
+coverage.out
 bundles
+/bin/
+/dist/
