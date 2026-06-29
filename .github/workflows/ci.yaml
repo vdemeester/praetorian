@@ -50,3 +50,13 @@ jobs:
       - uses: golangci/golangci-lint-action@v8
         with:
           version: latest
+
+  nix:
+    name: nix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
+      - run: nix flake check --print-build-logs
+      - run: nix build --print-build-logs
