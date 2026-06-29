@@ -42,22 +42,32 @@ Usage:
 
 Config lookup order (first found wins, no merge):
   1. --config PATH
-  2. ~/.config/praetorian/config.hcl
-  3. /etc/praetorian/config.hcl
+  2. ~/.config/praetorian/config.hcl, then config.json
+  3. /etc/praetorian/config.hcl, then config.json
 `)
 }
 
 // resolveConfigPath implements the documented lookup order. An explicit path
 // always wins (and is returned even if missing, so the error is clear).
+//
+// At each location HCL (human-written) is preferred over JSON (Nix-generated),
+// so a hand-edited config wins over a generated one in the same directory.
 func resolveConfigPath(explicit string) (string, error) {
 	if explicit != "" {
 		return explicit, nil
 	}
 	candidates := []string{}
 	if home, err := os.UserHomeDir(); err == nil {
-		candidates = append(candidates, filepath.Join(home, ".config", "praetorian", "config.hcl"))
+		dir := filepath.Join(home, ".config", "praetorian")
+		candidates = append(candidates,
+			filepath.Join(dir, "config.hcl"),
+			filepath.Join(dir, "config.json"),
+		)
 	}
-	candidates = append(candidates, "/etc/praetorian/config.hcl")
+	candidates = append(candidates,
+		"/etc/praetorian/config.hcl",
+		"/etc/praetorian/config.json",
+	)
 	for _, c := range candidates {
 		if _, err := os.Stat(c); err == nil {
 			return c, nil
