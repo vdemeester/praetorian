@@ -40,15 +40,25 @@
       homeManagerModules.praetorian = import ./nix/hm-module.nix self;
       homeManagerModules.default = self.homeManagerModules.praetorian;
 
-      checks = forAllSystems (pkgs: {
-        # Build the package (compiles everything).
-        package = self.packages.${pkgs.stdenv.hostPlatform.system}.praetorian;
+      checks = forAllSystems (
+        pkgs:
+        let
+          system = pkgs.stdenv.hostPlatform.system;
+        in
+        {
+          # Build the package (compiles everything).
+          package = self.packages.${system}.praetorian;
 
-        # Run the Go test suite as a flake check.
-        gotest = self.packages.${pkgs.stdenv.hostPlatform.system}.praetorian.overrideAttrs (_: {
-          doCheck = true;
-        });
-      });
+          # Run the Go test suite as a flake check.
+          gotest = self.packages.${system}.praetorian.overrideAttrs (_: {
+            doCheck = true;
+          });
+        }
+        # End-to-end SSH test via the NixOS VM test framework (Linux only).
+        // nixpkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+          e2e-ssh = import ./nix/tests/e2e-ssh.nix { inherit self pkgs; };
+        }
+      );
 
       formatter = forAllSystems (pkgs: pkgs.nixfmt-rfc-style);
 
