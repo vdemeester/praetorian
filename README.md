@@ -62,8 +62,11 @@ alias "okinawa-tpm" {
 Config lookup order (first found wins, **no merge**):
 
 1. `--config PATH`
-2. `~/.config/praetorian/config.hcl`
-3. `/etc/praetorian/config.hcl`
+2. `~/.config/praetorian/config.hcl`, then `config.json`
+3. `/etc/praetorian/config.hcl`, then `config.json`
+
+At each location the human-written HCL is preferred over a Nix-generated JSON
+config in the same directory.
 
 #### Constraints
 
