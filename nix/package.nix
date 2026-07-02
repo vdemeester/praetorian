@@ -1,13 +1,18 @@
 {
   lib,
   buildGoModule,
+  # Build metadata, normally threaded in from the flake so tagged builds
+  # report accurate values. Defaults keep `nix-build`/`callPackage` working.
+  commit ? "unknown",
+  date ? "1970-01-01T00:00:00Z",
 }:
 let
   fs = lib.fileset;
 in
 buildGoModule (finalAttrs: {
   pname = "praetorian";
-  version = "2.0.0-dev";
+  # Single source of truth: the VERSION file at the repo root.
+  version = lib.strings.trim (builtins.readFile ../VERSION);
 
   # Only the files that affect the build — keeps the store path stable when docs
   # or CI config change.
@@ -30,8 +35,8 @@ buildGoModule (finalAttrs: {
     "-s"
     "-w"
     "-X github.com/vdemeester/praetorian/version.Version=${finalAttrs.version}"
-    "-X github.com/vdemeester/praetorian/version.Commit=nix"
-    "-X github.com/vdemeester/praetorian/version.Date=1970-01-01T00:00:00Z"
+    "-X github.com/vdemeester/praetorian/version.Commit=${commit}"
+    "-X github.com/vdemeester/praetorian/version.Date=${date}"
   ];
 
   meta = {
