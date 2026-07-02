@@ -70,7 +70,7 @@ func simulate(cfg *config.Config, alias, command string) int {
 		fmt.Printf("✗ Command: %v\n→ DENIED\n", err)
 		return 1
 	}
-	matched, err := engine.Evaluate(a, tokens)
+	matched, err := engine.Evaluate(a, tokens, homeDir())
 	if err != nil {
 		fmt.Printf("✗ Alias: %s\n✗ Command: %s\n✗ %v\n→ DENIED\n", alias, first(tokens), err)
 		return 1

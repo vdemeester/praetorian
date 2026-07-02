@@ -10,7 +10,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"path"
 
 	"github.com/google/shlex"
 	"github.com/vdemeester/praetorian/internal/config"
@@ -31,14 +30,16 @@ func Tokenize(raw string) ([]string, error) {
 
 // Evaluate checks tokens against an alias's allow rules. On success it returns
 // the matched rule. On failure it returns ErrDenied (wrapped with a reason).
-func Evaluate(alias *config.Alias, tokens []string) (*config.Allow, error) {
+// home is the account home directory, used to resolve git's relative-path
+// shorthand arguments; it may be empty to disable relative resolution.
+func Evaluate(alias *config.Alias, tokens []string, home string) (*config.Allow, error) {
 	if len(tokens) == 0 {
 		return nil, fmt.Errorf("%w: empty command", ErrDenied)
 	}
 	var lastErr error
 	for i := range alias.Allow {
 		rule := &alias.Allow[i]
-		if err := matchRule(rule, tokens); err != nil {
+		if err := matchRule(rule, tokens, home); err != nil {
 			lastErr = err
 			continue
 		}
@@ -51,7 +52,7 @@ func Evaluate(alias *config.Alias, tokens []string) (*config.Allow, error) {
 }
 
 // matchRule reports whether tokens satisfy a single allow rule.
-func matchRule(rule *config.Allow, tokens []string) error {
+func matchRule(rule *config.Allow, tokens []string, home string) error {
 	prefix, err := shlex.Split(rule.Command)
 	if err != nil {
 		return fmt.Errorf("invalid allow command %q: %w", rule.Command, err)
@@ -77,7 +78,7 @@ func matchRule(rule *config.Allow, tokens []string) error {
 		if !ok {
 			return fmt.Errorf("%w: arg position %d out of range", ErrDenied, ac.Pos)
 		}
-		match, err := path.Match(ac.Glob, args[idx])
+		match, err := matchArg(ac.Glob, args[idx], home)
 		if err != nil {
 			return fmt.Errorf("bad glob %q: %w", ac.Glob, err)
 		}
@@ -88,7 +89,7 @@ func matchRule(rule *config.Allow, tokens []string) error {
 	if rule.AnyArg != nil {
 		found := false
 		for _, a := range args {
-			if m, err := path.Match(*rule.AnyArg, a); err != nil {
+			if m, err := matchArg(*rule.AnyArg, a, home); err != nil {
 				return fmt.Errorf("bad glob %q: %w", *rule.AnyArg, err)
 			} else if m {
 				found = true
@@ -101,7 +102,7 @@ func matchRule(rule *config.Allow, tokens []string) error {
 	}
 	if rule.NoArg != nil {
 		for _, a := range args {
-			if m, err := path.Match(*rule.NoArg, a); err != nil {
+			if m, err := matchArg(*rule.NoArg, a, home); err != nil {
 				return fmt.Errorf("bad glob %q: %w", *rule.NoArg, err)
 			} else if m {
 				return fmt.Errorf("%w: arg %q matches forbidden no_arg %q", ErrDenied, a, *rule.NoArg)
