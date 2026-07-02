@@ -15,10 +15,23 @@
         "aarch64-darwin"
       ];
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
+
+      # Build metadata threaded into the package so tagged/flake builds report
+      # accurate commit and date instead of placeholder values.
+      buildMeta = {
+        commit = self.rev or self.dirtyRev or "dirty";
+        # self.lastModifiedDate is "YYYYMMDDHHMMSS"; format as ISO 8601 UTC.
+        date =
+          let
+            d = self.lastModifiedDate or "19700101000000";
+            sub = builtins.substring;
+          in
+          "${sub 0 4 d}-${sub 4 2 d}-${sub 6 2 d}T${sub 8 2 d}:${sub 10 2 d}:${sub 12 2 d}Z";
+      };
     in
     {
       packages = forAllSystems (pkgs: rec {
-        praetorian = pkgs.callPackage ./nix/package.nix { };
+        praetorian = pkgs.callPackage ./nix/package.nix { inherit (buildMeta) commit date; };
         default = praetorian;
       });
 
@@ -31,7 +44,7 @@
       });
 
       overlays.default = _final: prev: {
-        praetorian = prev.callPackage ./nix/package.nix { };
+        praetorian = prev.callPackage ./nix/package.nix { inherit (buildMeta) commit date; };
       };
 
       nixosModules.praetorian = import ./nix/nixos-module.nix self;
