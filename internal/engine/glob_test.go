@@ -64,6 +64,18 @@ func TestMatchArgEdge(t *testing.T) {
 	if _, err := matchArg("/srv/[", "x", "/home/vincent"); err == nil {
 		t.Error("matchArg with bad pattern: expected error, got nil")
 	}
+	// Bad pattern segment following ** surfaces the error.
+	if _, err := globMatch("/srv/**/[", "/srv/a/x"); err == nil {
+		t.Error("globMatch with bad segment after **: expected error, got nil")
+	}
+	// ** cannot rescue a pattern that needs more trailing segments than exist.
+	if ok, err := globMatch("/a/**/b/c", "/a/x"); err != nil || ok {
+		t.Errorf(`globMatch("/a/**/b/c", "/a/x") = (%v, %v), want (false, nil)`, ok, err)
+	}
+	// Relative arg cleaning exactly to the pattern base is inside it.
+	if ok, err := matchArg("/home/vincent/git/**", "git", "/home/vincent"); err != nil || !ok {
+		t.Errorf(`matchArg base-equal = (%v, %v), want (true, nil)`, ok, err)
+	}
 }
 
 // TestMatchArg covers relative-path normalization against a home directory.
