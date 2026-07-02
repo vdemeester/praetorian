@@ -79,6 +79,22 @@ func TestEvaluate(t *testing.T) {
 	}
 }
 
+// TestEvaluateBadGlob ensures a malformed glob surfaces a (non-ErrDenied) error
+// from each constraint kind rather than silently allowing/denying.
+func TestEvaluateBadGlob(t *testing.T) {
+	cases := []config.Alias{
+		{Name: "arg", Allow: []config.Allow{{Command: "c", Args: []config.ArgConstraint{{Pos: 1, Glob: "["}}}}},
+		{Name: "any", Allow: []config.Allow{{Command: "c", AnyArg: ptr("[")}}},
+		{Name: "no", Allow: []config.Allow{{Command: "c", NoArg: ptr("[")}}},
+	}
+	for i := range cases {
+		_, err := Evaluate(&cases[i], []string{"c", "x"}, "/home/vincent")
+		if err == nil || errors.Is(err, ErrDenied) {
+			t.Errorf("%s: Evaluate with bad glob = %v, want a non-ErrDenied error", cases[i].Name, err)
+		}
+	}
+}
+
 // TestEvaluateRecursiveGlob exercises ** and relative-path normalization
 // end-to-end through Evaluate.
 func TestEvaluateRecursiveGlob(t *testing.T) {

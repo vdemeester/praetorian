@@ -67,3 +67,11 @@ func TestResolveConfigPath_ExplicitWins(t *testing.T) {
 		t.Errorf("expected explicit path, got %q", got)
 	}
 }
+
+func TestHomeDir(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("HOME", dir)
+	if got := homeDir(); got != dir {
+		t.Errorf("homeDir() = %q, want %q", got, dir)
+	}
+}
