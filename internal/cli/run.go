@@ -59,7 +59,7 @@ func runCmd(args []string) int {
 		return 1
 	}
 
-	matched, err := engine.Evaluate(a, tokens)
+	matched, err := engine.Evaluate(a, tokens, homeDir())
 	if err != nil {
 		log.Warn("command denied", "alias", alias, "command", first(tokens), "args", argsOf(tokens), "result", "DENIED", "reason", err)
 		denied()

@@ -47,6 +47,15 @@ Config lookup order (first found wins, no merge):
 `)
 }
 
+// homeDir returns the account home directory used to resolve git's
+// relative-path shorthand, or "" if it cannot be determined.
+func homeDir() string {
+	if h, err := os.UserHomeDir(); err == nil {
+		return h
+	}
+	return ""
+}
+
 // resolveConfigPath implements the documented lookup order. An explicit path
 // always wins (and is returned even if missing, so the error is clear).
 //

@@ -48,6 +48,8 @@ func TestEvaluate(t *testing.T) {
 		},
 	}
 
+	const home = "/home/vincent"
+
 	allowed := [][]string{
 		{"borg", "serve"},
 		{"borg", "serve", "--anything"}, // prefix match, any trailing args
@@ -56,7 +58,7 @@ func TestEvaluate(t *testing.T) {
 		{"nc", "host.internal", "22"},
 	}
 	for _, tokens := range allowed {
-		if _, err := Evaluate(alias, tokens); err != nil {
+		if _, err := Evaluate(alias, tokens, home); err != nil {
 			t.Errorf("Evaluate(%v) = denied (%v), want allowed", tokens, err)
 		}
 	}
@@ -71,7 +73,42 @@ func TestEvaluate(t *testing.T) {
 		{"nc", "host.internal", "22", "extra"},          // num_args
 	}
 	for _, tokens := range denied {
-		if _, err := Evaluate(alias, tokens); !errors.Is(err, ErrDenied) {
+		if _, err := Evaluate(alias, tokens, home); !errors.Is(err, ErrDenied) {
+			t.Errorf("Evaluate(%v) = %v, want ErrDenied", tokens, err)
+		}
+	}
+}
+
+// TestEvaluateRecursiveGlob exercises ** and relative-path normalization
+// end-to-end through Evaluate.
+func TestEvaluateRecursiveGlob(t *testing.T) {
+	const home = "/home/vincent"
+	alias := &config.Alias{
+		Name: "git",
+		Allow: []config.Allow{
+			{Command: "git-upload-pack", Args: []config.ArgConstraint{{Pos: 1, Glob: "/home/vincent/git/**"}}, NumArgs: ptr(1)},
+		},
+	}
+
+	allowed := [][]string{
+		{"git-upload-pack", "/home/vincent/git/passage.git"},
+		{"git-upload-pack", "/home/vincent/git/public/home.git"},
+		{"git-upload-pack", "git/passage.git"},
+		{"git-upload-pack", "git/public/home.git"},
+	}
+	for _, tokens := range allowed {
+		if _, err := Evaluate(alias, tokens, home); err != nil {
+			t.Errorf("Evaluate(%v) = denied (%v), want allowed", tokens, err)
+		}
+	}
+
+	denied := [][]string{
+		{"git-upload-pack", "git/../../etc/passwd"},
+		{"git-upload-pack", "/etc/passwd"},
+		{"git-upload-pack", "/home/other/git/x.git"},
+	}
+	for _, tokens := range denied {
+		if _, err := Evaluate(alias, tokens, home); !errors.Is(err, ErrDenied) {
 			t.Errorf("Evaluate(%v) = %v, want ErrDenied", tokens, err)
 		}
 	}
